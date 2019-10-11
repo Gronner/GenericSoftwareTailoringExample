@@ -1,0 +1,101 @@
+Global {
+	System = "I4Copter";
+}
+
+Hardware {
+	Compartment ^Compartment {
+		Box ^Box {
+			Board ^Board {
+				Processor ^Processor {
+					Manufacturer = "Infineon";
+					Type = "TC277";
+					Provides 32768 of exclusive feature "LMU RAM";
+					Provides 4194304 of exclusive feature "PMU Program Flash";
+					Core Core0 {
+						Capacity = 100;
+						Architecture = "TriCore 1.6 P";
+						Provides shared feature "Performance";
+						Provides shared feature "FPU";
+						Provides 16384 of exclusive feature "I-Cache";
+						Provides 8192 of exclusive feature "D-Cache";
+					}
+					Core Core1 {
+						Capacity = 100;
+						Architecture = "TriCore 1.6 P";
+						Provides shared feature "Performance";
+						Provides shared feature "FPU";
+						Provides shared feature "Lockstep";
+						Provides 16384 of exclusive feature "I-Cache";
+						Provides 8192 of exclusive feature "D-Cache";
+					}
+					Core Core2 {
+						Capacity = 60;
+						Architecture = "TriCore 1.6 E";
+						Provides shared feature "Efficiency";
+						Provides shared feature "FPU";
+						Provides shared feature "Lockstep";
+						Provides 8192 of exclusive feature "I-Cache";
+						Provides 128 of exclusive feature "DMI Readbuffer";
+					}
+				}
+			}
+		}
+	}
+}
+
+Software {
+	Application OS_Application_0 {
+		Task T1_Controllers {
+			CoreUtilization = 2; // Percent: 0.15/9  
+		}
+	}
+	
+	Application OS_Application_1 {
+		Task T3_AttitudeObserver {
+			CoreUtilization = 20; // Percent: 0.6/3 
+		}
+	}
+	
+	Application OS_Application_2 {
+		Task T2_EngineController {
+			CoreUtilization = 2; // Percent: 0.15/9 
+			Requires shared Core feature "Lockstep";
+		}
+	}
+	
+	Application OS_Application_3 {
+		Task T4_HeightObserver {
+			CoreUtilization = 20; // Percent: 0.6/3 
+		}
+	}
+	
+	Application OS_Application_4 {
+		Task T6_DSP {
+			CoreUtilization = 3; // Percent: 0.3/9 
+		}
+	}
+	
+	Application OS_Application_5 {
+		Task T5_AltitudeObserver {
+			CoreUtilization = 20; // Percent: 0.6/3 
+		}
+	}
+	
+}
+
+TaskGraph {
+	OS_Application_4.T6_DSP -> OS_Application_1.T3_AttitudeObserver;
+	OS_Application_1.T3_AttitudeObserver -> OS_Application_3.T4_HeightObserver, OS_Application_5.T5_AltitudeObserver;
+	OS_Application_3.T4_HeightObserver -> OS_Application_0.T1_Controllers;
+	OS_Application_5.T5_AltitudeObserver -> OS_Application_0.T1_Controllers;
+	OS_Application_0.T1_Controllers -> OS_Application_2.T2_EngineController;
+}
+
+Restrictions {
+	// T6_DSP und T3_AttitudeObserver dürfen nicht auf dem gleichen Kern laufen 
+	OS_Application_4.T6_DSP, OS_Application_1.T3_AttitudeObserver dislocal up to Core;
+	
+	// T6_DSP und T4_HeightObserver dürfen nicht auf dem gleichen Kern laufen 
+	OS_Application_4.T6_DSP, OS_Application_3.T4_HeightObserver dislocal up to Core;
+}
+

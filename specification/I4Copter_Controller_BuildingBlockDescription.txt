@@ -1,0 +1,133 @@
+﻿Controller Blocks {
+    WCET = 0.15ms of all Elements in Control Blocks
+
+    Engine Control -> (Engine Controller) T2
+        Priority = 5
+        Period = 9ms
+        Input{
+            thrustZ_N_attCtr < Attitude Controller
+            torqueX_NM_attCtr < Attitude Controller
+            torqueY_NM_attCtr < Attitude Controller
+            torqueZ_NM_attCtr < Attitude Controller
+        }
+        Output{
+            throttleLeft_engCtr > Plant/Engines
+            throttleFront_engCtr > Plant/Engines
+            throttleRight_engCt > Plant/Engines
+            throttleRear_engCtr > Plant/Engines
+            torqueX_NM_engCtr > Attitude Observer
+            torqueY_NM_engCtr > Attitude Observer
+            torqueZ_NM_engCtr > (Height Observer, Altitude Observer)
+            takeOff_engCtr > (Attitude Controller, Attitude Observer)
+        }
+
+    Altitude Controller T1 {
+        Priority = 6
+        Period = 9ms
+        Input{
+            Velocity_Ms_rem < Remote Control
+            Altitude_m_altObs < Altitude Observer
+            VelocityZ_Ms_altObs < Altitude Observer
+            AccZ_g_altObs < Altitude Observer
+        }
+        Output{
+            ThrustZ_g_altCon > Attitude Controller
+        }
+    }
+    Attitude Controller T1 {
+        Priority = 6
+        Period = 9ms
+        Input{
+            thrustZ_g_altCon < Altitude Controller
+            angleX_RAD_rem < Remote Control
+            angleY_RAD_rem < Remote Control
+            angularRateZ_RADs_rem < Remote Control
+            statesY_attObs < Attitude Observer
+            statesX_attObs < Attitude Observer
+            angularRateZ_RADs_dsp < Digital Signal Processor
+            takeOff_eng_Ctr < Engine Control
+        }
+        Output{
+            thrustZ_N_attCtr > Engine Control
+            torqueX_NM_attCtr > Engine Control
+            torqueY_NM_attCtr > Engine Control
+            torqueZ_NM_attCtr > Engine Control
+        }
+    }
+}
+Altitude Observer T5 {
+    Priority = 2
+    Period = 3ms
+    WCET  = 0.6ms
+    Input{
+        AngleX_RAD_attObs < Attitude Observer
+        AngleY_RAD_attObs < Attitude Observer
+        ThrustZ_N_engCtr < Engine Control
+        TakeOff_engCtr < Engine Control
+        Altitude_m_dsp < Digital Signal Processor
+        Acc_z_dsp < Digital Signal Processor        
+    }
+    Output{
+        Altitude_m_altObs > (Altitude Evaluation, Altitude Control)
+        VelocityZ_Ms_altObs > (Altitude Evaluation, Altitude Control)
+        AccZ_g_altObs > (Altitude Evaluation, Altitude Control)
+        distZ_N_altObs > Altitude Evaluation
+    }
+}
+Attitude Observer -> (AttitudeObserverXAxis, AttitudeObserverYAxis) T3 {
+    Priority  = 3
+    Period = 3ms
+    WCET  = 0.6ms
+    Input{
+        takeOff_engCtr < Engine Control
+        torqueY_NM_engCtr < Engine Control
+        torqueX_NM_engCtr < Engine Control
+        accY_g_dsp < Digital Signal Processor
+        angularRateY_RADs_dsp < Digital Signal Processor
+        accX_g_dsp < Digital Signal Processor
+        angularRateX_RADs_dsp < Digital Signal Processor
+    }
+    Output{
+        angularStatesX_attObs > Attitude Controller
+        angularStatesY_attObs > Attitude Controller
+        angularRateX_RADs_attObs > Attitude Observer Evaluation
+        angleX_RAD_attObs > (Attitude Observer Evaluation, Height Observer, Altitude Observer)
+        angularRateY_RADs_attObs > Attitude Observer Evaluation
+        angleY_RAD_attObs > Attitude Observer Evaluation, Height Observer, Altitude Observer)
+    }
+}
+Height Observer T4 {
+    Priority = 4
+    Period = 3ms
+    WCET = 0.6
+    Input{
+        AngleX_RAD_attObs < Attitude Observer
+        AngleY_RAD_attObs < Attitude Observer
+        Thrust_N_engCtr < Engine Control
+        TakeOff_engCtr < Engine Control
+        Altitude_m_dsp < Digital Signal Processor
+        AccZ_g_dsp < Digital Signal Processor
+    }
+    Output{
+        Attitude_m_altObs > Altitude Evaluation
+        VelocityZ_Ms_altObs > Altitude Evaluation
+        AccZ_Mss_altObs > Altitude Evaluation
+        distZ_N_altObs > Altitude Evaluation
+    }
+}
+Digital Signal Processor T6 {
+    Priority = 1
+    Period = 9ms / min 20ms, max 8.6ms
+    WCET = 0.3ms (incl. sensor readout)
+    Input < Plant
+    Output{
+        accY_g_dsp > Attitude Observer
+        angularRateY_RADs_dsp > Attitude Observer
+        accX_g_dsp > Attitude Observer
+        angularRateX_RADs_dsp > Attitude Observer
+        angularRateZ_RADs_dsp > Attitude Controller
+        accZ_g_dsp > (Height Observer, Altitude Observer)
+        altitude_m_dsp > Altitude Observer
+        distance_m_dsp > Height Observer
+    }
+}

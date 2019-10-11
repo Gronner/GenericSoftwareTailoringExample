@@ -1,0 +1,100 @@
+
+
+/begin MODULE
+    I4Copter	/* Name */
+    ""	/* LongIdentifier */
+
+    /begin A2ML
+        block "IF_DATA" taggedunion if_data {
+        };
+    /end A2ML
+
+    /begin MOD_PAR
+        ""	/* Comment */
+        NO_OF_INTERFACES 0
+    /end MOD_PAR 
+
+    /begin MOD_COMMON
+        ""
+        ALIGNMENT_BYTE 1
+        ALIGNMENT_WORD 2
+        ALIGNMENT_LONG 2
+        ALIGNMENT_FLOAT32_IEEE 2
+        ALIGNMENT_FLOAT64_IEEE 4
+        BYTE_ORDER MSB_LAST
+        DEPOSIT ABSOLUTE
+    /end MOD_COMMON 
+
+    /begin CHARACTERISTIC
+        VI_Gain_Value	/* Name */
+        ""	/* LongIdentifier */
+        VALUE	/* Type */
+        0x0000	/* Address */
+        FLOAT32_IEEE_COL_DIRECT	/* Deposit */
+        0	/* MaxDiff */
+        VOID_SCALING	/* Conversion */
+        -3.402e38	/* LowerLimit */
+        3.402e38	/* UpperLimit */
+        BYTE_ORDER MSB_LAST
+    /end CHARACTERISTIC
+
+    /begin CHARACTERISTIC
+        x_axis__VI_Gain	/* Name */
+        ""	/* LongIdentifier */
+        VAL_BLK	/* Type */
+        0x0000	/* Address */
+        FLOAT32_IEEE_COL_DIRECT	/* Deposit */
+        0	/* MaxDiff */
+        VOID_SCALING	/* Conversion */
+        -3.402e38	/* LowerLimit */
+        3.402e38	/* UpperLimit */
+        NUMBER 3
+        BYTE_ORDER MSB_LAST
+    /end CHARACTERISTIC
+
+    /begin MEASUREMENT
+        x_axis__VI_Integrator	/* Name */
+        ""	/* LongIdentifier */
+        FLOAT32_IEEE	/* Datatype */
+        VOID_SCALING	/* Conversion */
+        1	/* Resolution */
+        100	/* Accuracy */
+        -3.402e38	/* LowerLimit */
+        3.402e38	/* UpperLimit */
+        ECU_ADDRESS 0x0000
+        BYTE_ORDER MSB_LAST
+    /end MEASUREMENT
+
+    /begin COMPU_METHOD
+        VOID_SCALING	/* Name */
+        "Void scaling for unscaled variables"	/* LongIdentifier */
+        RAT_FUNC	/* ConversionType */
+        "%12.6"	/* Format */
+        ""	/* Unit */
+        COEFFS 0 1 0 0 0 1
+    /end COMPU_METHOD
+
+    /begin FUNCTION
+        STEP_AttitudeObserver	/* Name */
+        ""	/* LongIdentifier */
+        /begin DEF_CHARACTERISTIC
+            x_axis__VI_Gain	/* Identifier */
+        /end DEF_CHARACTERISTIC
+        /begin LOC_MEASUREMENT
+            x_axis__VI_Integrator	/* Identifier */
+        /end LOC_MEASUREMENT
+    /end FUNCTION
+
+    /begin FUNCTION
+        STEP_HeightObserver	/* Name */
+        ""	/* LongIdentifier */
+        /begin DEF_CHARACTERISTIC
+            VI_Gain_Value	/* Identifier */
+        /end DEF_CHARACTERISTIC
+    /end FUNCTION
+
+    /begin RECORD_LAYOUT
+        FLOAT32_IEEE_COL_DIRECT	/* Name */
+        FNC_VALUES 1 FLOAT32_IEEE COLUMN_DIR DIRECT
+    /end RECORD_LAYOUT
+/end MODULE 
